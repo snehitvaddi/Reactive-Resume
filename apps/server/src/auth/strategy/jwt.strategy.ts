@@ -15,7 +15,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     private readonly configService: ConfigService<Config>,
     private readonly userService: UserService,
   ) {
-    const extractors = [(request: Request) => request.cookies.Authentication];
+    // Support both cookie-based auth (for browser) and Bearer token (for API clients)
+    const extractors = [
+      (request: Request) => request.cookies?.Authentication,
+      ExtractJwt.fromAuthHeaderAsBearerToken(),
+    ];
 
     super({
       secretOrKey: configService.get<string>("ACCESS_TOKEN_SECRET"),

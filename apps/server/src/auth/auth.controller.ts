@@ -92,7 +92,14 @@ export class AuthController {
     redirectUrl.searchParams.set("status", status);
 
     if (redirect) response.redirect(redirectUrl.toString());
-    else response.status(200).send(responseData);
+    else {
+      // Include tokens in response body for API clients that can't access cookies
+      response.status(200).send({
+        ...responseData,
+        accessToken,
+        refreshToken,
+      });
+    }
   }
 
   @Post("register")
