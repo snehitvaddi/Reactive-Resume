@@ -1,0 +1,91 @@
+# Custom docker-compose for Finetune Resume project
+# Based on the official Reactive Resume compose.yml
+
+services:
+  # Database (Postgres)
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Storage (for PDF uploads)
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+  # Chrome Browser (for PDF generation)
+  chrome:
+    image: ghcr.io/browserless/chromium:latest
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      HEALTH: "true"
+      TOKEN: chrome_token
+      PROXY_HOST: "chrome"
+      PROXY_PORT: 3000
+      PROXY_SSL: "false"
+
+  # Reactive Resume App (API + Frontend)
+  app:
+    image: amruthpillai/reactive-resume:latest
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    depends_on:
+      - postgres
+      - minio
+      - chrome
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+
+      # URLs - Update PUBLIC_URL when deploying to production
+      PUBLIC_URL: http://localhost:3100
+      STORAGE_URL: http://localhost:9000/default
+
+      # Chrome/PDF generation
+      CHROME_TOKEN: chrome_token
+      CHROME_URL: ws://chrome:3000
+
+      # Database
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+
+      # Auth secrets - CHANGE THESE IN PRODUCTION
+      ACCESS_TOKEN_SECRET: access_token_secret_change_in_production
+      REFRESH_TOKEN_SECRET: refresh_token_secret_change_in_production
+
+      # Email (disabled for our use case)
+      MAIL_FROM: noreply@localhost
+
+      # Storage (MinIO)
+      STORAGE_ENDPOINT: minio
+      STORAGE_PORT: 9000
+      STORAGE_REGION: us-east-1
+      STORAGE_BUCKET: default
+      STORAGE_ACCESS_KEY: minioadmin
+      STORAGE_SECRET_KEY: minioadmin
+      STORAGE_USE_SSL: "false"
+      STORAGE_SKIP_BUCKET_CHECK: "false"
+
+volumes:
+  minio_data:
+  postgres_data:
