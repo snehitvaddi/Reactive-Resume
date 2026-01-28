@@ -73,28 +73,19 @@ const Header = () => {
               )}
             </div>
           ))}
+          {/* Profiles inline with contact info */}
+          {profiles.visible && profiles.items.filter((item) => item.visible).map((item) => (
+            <div key={item.id} className="flex items-center gap-x-1.5">
+              <Link
+                url={item.url}
+                label={item.username}
+                className="text-sm"
+                icon={<BrandIcon slug={item.icon} />}
+              />
+            </div>
+          ))}
         </div>
       </div>
-
-      {profiles.visible && profiles.items.length > 0 && (
-        <div
-          className="grid gap-x-4 gap-y-1 text-right"
-          style={{ gridTemplateColumns: `repeat(${profiles.columns}, auto)` }}
-        >
-          {profiles.items
-            .filter((item) => item.visible)
-            .map((item) => (
-              <div key={item.id} className="flex items-center gap-x-2">
-                <Link
-                  url={item.url}
-                  label={item.username}
-                  className="text-sm"
-                  icon={<BrandIcon slug={item.icon} />}
-                />
-              </div>
-            ))}
-        </div>
-      )}
     </div>
   );
 };

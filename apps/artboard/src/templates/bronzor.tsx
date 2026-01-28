@@ -26,6 +26,7 @@ import type { TemplateProps } from "../types/template";
 
 const Header = () => {
   const basics = useArtboardStore((state) => state.resume.basics);
+  const profiles = useArtboardStore((state) => state.resume.sections.profiles);
 
   return (
     <div className="flex flex-col items-center space-y-2 text-center">
@@ -36,7 +37,7 @@ const Header = () => {
         <div className="text-base">{basics.headline}</div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
+      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-sm">
         {basics.location && (
           <div className="flex items-center gap-x-1.5">
             <i className="ph ph-bold ph-map-pin text-primary" />
@@ -70,6 +71,16 @@ const Header = () => {
             ) : (
               <span>{[item.name, item.value].filter(Boolean).join(": ")}</span>
             )}
+          </div>
+        ))}
+        {/* Profiles inline with contact info */}
+        {profiles.visible && profiles.items.filter((item) => item.visible).map((item) => (
+          <div key={item.id} className="flex items-center gap-x-1.5">
+            <Link
+              url={item.url}
+              label={item.username}
+              icon={<BrandIcon slug={item.icon} />}
+            />
           </div>
         ))}
       </div>
@@ -517,9 +528,7 @@ const Custom = ({ id }: { id: string }) => {
 
 const mapSectionToComponent = (section: SectionKey) => {
   switch (section) {
-    case "profiles": {
-      return <Profiles />;
-    }
+    // profiles are rendered inline in Header, not as a separate section
     case "summary": {
       return <Summary />;
     }
