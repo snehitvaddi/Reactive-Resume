@@ -359,11 +359,13 @@ const Skills = () => {
   const section = useArtboardStore((state) => state.resume.sections.skills);
 
   return (
-    <Section<Skill> section={section} levelKey="level" keywordsKey="keywords">
+    <Section<Skill> section={section}>
       {(item) => (
-        <div className="space-y-0.5">
-          <div className="font-bold">{item.name}</div>
-          <div>{item.description}</div>
+        <div>
+          <span className="font-bold">{item.name}</span>
+          {item.keywords?.length > 0 && (
+            <span>: {item.keywords.join(", ")}</span>
+          )}
         </div>
       )}
     </Section>

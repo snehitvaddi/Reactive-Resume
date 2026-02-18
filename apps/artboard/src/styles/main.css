@@ -12,6 +12,12 @@ body {
   overflow: hidden;
 }
 
+@media print {
+  body {
+    overflow: visible !important;
+  }
+}
+
 #root {
   @apply antialiased;
 }
